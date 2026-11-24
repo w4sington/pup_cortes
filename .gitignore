@@ -18,6 +18,7 @@ saida/
 
 # Arquivos que o programa cria enquanto roda
 status.json
+status.tmp
 servidor_ia.json
 ultima_postagem.json
 analise_ok.txt
@@ -46,3 +47,7 @@ redes.py
 4_LIGAR_WHATSAPP.bat
 5_LIGAR_JUNTO_COM_O_WINDOWS.bat
 LEIA-ME_SITE.txt
+
+# Copias de seguranca locais e atalhos
+backup_*/
+*.lnk

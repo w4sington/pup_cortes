@@ -22,6 +22,14 @@ O QUE ELE FAZ
 
 
 ---------------------------------------------------------------------
+ ATUALIZAR PARA A VERSAO NOVA
+---------------------------------------------------------------------
+  Feche o pup_cortes e abra o 7_ATUALIZAR.bat. Ele baixa a versao
+  nova do GitHub e mostra o que mudou. Suas configuracoes, videos e
+  cortes prontos nao sao mexidos.
+
+
+---------------------------------------------------------------------
  PREPARANDO O LM STUDIO (toda vez que for usar)
 ---------------------------------------------------------------------
   1. Abra o LM Studio e carregue o Gemma 4 12B.

@@ -51,6 +51,12 @@ cd pup_cortes
   (compilador C# que já vem no Windows) e põe o atalho na área de trabalho.
 - Evite pastas com acento ou dentro do OneDrive.
 
+## Atualizar
+
+Abra o `7_ATUALIZAR.bat`. Ele faz o `git pull`, confere os componentes e refaz o `pup_cortes.exe`
+se precisar. O `configuracoes.ini`, a pasta `entrada` e a pasta `saida` não são mexidos.
+(Funciona se a pasta veio pelo `git clone`; quem baixou em .zip precisa baixar de novo.)
+
 ## Como usar
 
 **Pelo app (jeito fácil):** abra o atalho `pup_cortes`, escolha o vídeo ou cole o link, marque o tipo
@@ -63,6 +69,7 @@ Os cortes ficam em `saida\<nome do vídeo>\`.
 |---|---|
 | `2_GERAR_CORTES.bat` | Corta os vídeos da pasta `entrada` (ou arraste um vídeo em cima dele) |
 | `3_GERAR_CAPAS.bat` | Refaz as capas de vídeos já cortados |
+| `7_ATUALIZAR.bat` | Baixa a versão nova do GitHub (sem mexer nas suas configurações e vídeos) |
 
 **Pela linha de comando:**
 
