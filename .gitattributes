@@ -1,0 +1,7 @@
+* text=auto
+# Os .bat precisam de fim de linha do Windows (CRLF), senao quebram
+*.bat text eol=crlf
+*.cs  text eol=crlf
+*.ico binary
+*.png binary
+*.exe binary

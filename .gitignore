@@ -1,0 +1,47 @@
+# Configuracoes deste PC (tem a senha do PC do site). O modelo e o configuracoes.exemplo.ini
+configuracoes.ini
+
+# Ambiente do Python e FFmpeg local (o 1_INSTALAR.bat cria/instala)
+.venv/
+venv/
+ffmpeg/
+__pycache__/
+*.py[cod]
+
+# O .exe e gerado pelo 6_CRIAR_ATALHO_NA_AREA_DE_TRABALHO.bat (app_arquivos/pup_cortes.cs)
+pup_cortes.exe
+
+# Videos e cortes (pesados e particulares)
+entrada/*
+!entrada/COLOQUE_OS_VIDEOS_AQUI.txt
+saida/
+
+# Arquivos que o programa cria enquanto roda
+status.json
+servidor_ia.json
+ultima_postagem.json
+analise_ok.txt
+*.log
+
+# Videos soltos, por garantia
+*.mp4
+*.mkv
+*.mov
+*.webm
+*.part
+
+# Sistema
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+
+# Integracao particular com o site da loja (WhatsApp, postagens, ligar o PC a distancia).
+# Fica so neste PC: o programa funciona sem ela.
+whatsapp_cortes.py
+vigia_whatsapp.py
+vigia_bandeja.pyw
+redes.py
+4_LIGAR_WHATSAPP.bat
+5_LIGAR_JUNTO_COM_O_WINDOWS.bat
+LEIA-ME_SITE.txt

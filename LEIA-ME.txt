@@ -1,0 +1,185 @@
+=====================================================================
+  GERADOR DE CORTES AUTOMATICOS
+  Video longo entra -> cortes prontos para TikTok, Reels e Kwai saem
+=====================================================================
+
+O QUE ELE FAZ
+  1. Transcreve tudo o que e falado no video (Whisper)
+  2. O Gemma, rodando no LM Studio, escolhe os melhores momentos
+  3. Corta, deixa em pe (9:16) seguindo o rosto e coloca legenda animada
+  4. Cria uma CAPA (thumbnail) para cada corte, com texto chamativo
+  5. Escreve titulo, legenda de postagem e hashtags de cada corte
+
+
+---------------------------------------------------------------------
+ INSTALACAO (so na primeira vez)
+---------------------------------------------------------------------
+  1. Extraia esta pasta num lugar facil, ex.: C:\Cortes
+     (evite caminhos com acento ou dentro do OneDrive)
+  2. Clique duas vezes no 1_INSTALAR.bat e espere terminar.
+     - Se ele instalar o Python, feche e abra o 1_INSTALAR.bat de novo.
+  3. Pronto.
+
+
+---------------------------------------------------------------------
+ PREPARANDO O LM STUDIO (toda vez que for usar)
+---------------------------------------------------------------------
+  1. Abra o LM Studio e carregue o Gemma 4 12B.
+  2. Na hora de carregar, aumente o "Context Length" para 8192
+     (ou mais). Com o padrao de 4096 a IA pode nao dar conta.
+  3. Va na aba "Developer" (icone </>) e ligue o servidor
+     (tem que aparecer "Status: Running").
+
+
+---------------------------------------------------------------------
+ PUP_CORTES: O JEITO FACIL (SEM JANELA PRETA)
+---------------------------------------------------------------------
+  Um programa com janela e botoes, feito para qualquer pessoa usar.
+
+  Na primeira vez: abra o 6_CRIAR_ATALHO_NA_AREA_DE_TRABALHO.bat.
+  Aparece o icone "pup_cortes" na area de trabalho.
+
+  Para usar:
+  1. Clique duas vezes em "pup_cortes"
+  2. Clique em "Procurar..." e escolha o video, OU cole o link do
+     video (YouTube, Instagram, TikTok, Kwai, Twitch) no campo e
+     clique em "Baixar". O video baixado vai para a pasta entrada.
+  3. Escolha quantos cortes quer e clique em "Fazer cortes"
+  4. Espere a barra encher. No fim aparecem os cortes prontos:
+     "Assistir" abre o video e "Copiar legenda" copia o texto
+     para colar na hora de postar.
+
+  - Da para arrastar o video em cima do icone tambem.
+  - Link que parou de baixar? O YouTube muda sempre: em "Ajustes...",
+    clique em "Atualizar o baixador".
+  - So baixe videos de canais que autorizaram os cortes.
+  - Se o LM Studio estiver desligado, o programa tenta ligar sozinho.
+  - Pode fechar a janela no meio: os cortes continuam, e quando
+    abrir de novo ele mostra o andamento.
+  - O botao "Ajustes..." muda a cor da legenda, o credito (@ do
+    canal) e quantos cortes fazer.
+  - Modelo de IA local (em "Ajustes..."): baixe o arquivo .gguf,
+    ponha na pasta dos modelos (padrao: a do LM Studio,
+    %USERPROFILE%\.lmstudio\models), escolha na lista e clique em
+    "Carregar". Ele vai inteiro para a placa de video, sem abrir o
+    LM Studio e SEM prender copia na RAM: o app roda o llama-server
+    (o motor Vulkan que vem com o LM Studio) do jeito certo. O LM
+    Studio, com "Keep Model in Memory", travava uma copia do modelo
+    na RAM e o PC ficava sem memoria.
+    "Descarregar" libera a placa e a RAM, e "Testar" faz uma
+    pergunta rapida ao modelo. O modelo fica em
+    http://127.0.0.1:1234/v1 (formato OpenAI), com o mesmo nome do
+    LM Studio (ex.: qwen/qwen3.5-9b): o programa e os scripts
+    continuam iguais. Ele responde sem o "pensar" antes (mais rapido).
+    Se o .gguf vier com um arquivo mmproj (a parte de "ver" imagens),
+    deixe os dois na mesma pasta. O .gguf pode estar em qualquer pasta.
+    Ao carregar, o LM Studio descarrega e desliga o servidor dele (o
+    app pergunta antes). O modelo continua ligado com o app fechado;
+    depois de reiniciar o PC, o "Fazer cortes" liga ele sozinho.
+    O que o modelo escreve fica em logs\servidor_ia.log.
+  - O pup_cortes.exe precisa ficar nesta pasta (ele usa o que o
+    1_INSTALAR.bat instalou). Na area de trabalho, use o atalho.
+
+
+---------------------------------------------------------------------
+ GAMEPLAY: CORTES DE JOGO (LIVE QUASE SEM FALA)
+---------------------------------------------------------------------
+  Para lives e gameplays em que quase ninguem fala (ex.: GTA VI).
+  Em vez de OUVIR, a IA ASSISTE o video.
+
+  1. Na tela inicial, em "Tipo de video", marque "Gameplay".
+     (o app lembra da escolha)
+  2. Escreva o nome do jogo (ex.: GTA VI). Ajuda a IA nos ganchos.
+  3. Escolha o video (ou cole o link e clique em Baixar) e clique em
+     "Fazer cortes".
+
+  O que ele faz:
+  - Mede o som e o movimento de cada segundo e tira 1 imagem a cada
+    10 s (a placa de video decodifica; quase nada fica na RAM).
+  - A IA da notas a cada imagem: graficos, acao e coisas curiosas.
+    Ela olha 4 imagens de uma vez: uma live de 4 h leva uns 30 min.
+  - Escolhe os melhores trechos (mistura graficos, acao e curiosos),
+    tira tela preta, menu e tela de carregamento das pontas.
+  - A IA escreve o gancho, o titulo, a legenda e as hashtags.
+  - Sai em pe (9:16), TELA CHEIA (so o jogo, as laterais sao
+    cortadas), gancho escrito no topo so nos primeiros 4 s, SEM marca
+    d'agua e sem credito. Volume -14 LUFS. Capa em tela cheia tambem.
+  - Precisa de um modelo de IA com VISAO (ex.: Qwen3.5 9B com o
+    arquivo mmproj na mesma pasta). Carregue em Ajustes.
+  - Duracao (padrao 40 s), tempo do gancho e nome do jogo ficam no
+    configuracoes.ini, secao [gameplay].
+  - A analise fica guardada na pasta do video (_analise): fazer de
+    novo o mesmo video e bem mais rapido.
+  - Cuidado com musica: se o radio do jogo estiver tocando no trecho,
+    o YouTube/TikTok pode reivindicar os direitos da musica.
+
+
+---------------------------------------------------------------------
+ GERANDO OS CORTES
+---------------------------------------------------------------------
+  Jeito 1: coloque os videos na pasta "entrada" e clique duas vezes
+           no 2_GERAR_CORTES.bat
+  Jeito 2: arraste o video em cima do 2_GERAR_CORTES.bat
+
+  Os cortes aparecem em: saida\<nome do video>\
+    - corte_01_....mp4   (o 01 e o que a IA achou melhor)
+    - corte_01_..._capa.jpg (a capa/thumbnail do corte)
+    - POSTAGENS.txt      (titulo, legenda e hashtags de cada corte)
+
+
+---------------------------------------------------------------------
+ CAPAS (THUMBNAILS)
+---------------------------------------------------------------------
+  As capas sao feitas junto com os cortes. O programa escolhe o
+  quadro mais nitido com rosto e coloca o texto abaixo do rosto.
+
+  Para fazer capas de videos que JA foram cortados, ou refazer:
+    -> clique duas vezes no 3_GERAR_CAPAS.bat
+
+  Para mudar o texto de uma capa:
+    1. Abra o cortes_escolhidos.json da pasta do video (Bloco de Notas)
+    2. Mude o que esta em "texto_capa"
+    3. Salve e rode o 3_GERAR_CAPAS.bat
+
+  Na TikTok/Kwai/Reels, escolha a capa na hora de postar: opcao
+  "Selecionar capa" / "Editar capa" -> "Enviar da galeria".
+
+
+---------------------------------------------------------------------
+ AJUSTES (arquivo configuracoes.ini - abra com o Bloco de Notas)
+---------------------------------------------------------------------
+  quantidade_cortes  -> quantos cortes por video
+  duracao_minima / duracao_maxima -> tamanho de cada corte (segundos)
+  tema_do_canal      -> conte o assunto do canal para a IA acertar mais
+  modo               -> auto, rosto ou desfoque
+  cor_destaque       -> cor da palavra em destaque na legenda
+  credito            -> @ do canal original, aparece no rodape
+  modelo_whisper     -> small se o PC for fraco
+
+
+---------------------------------------------------------------------
+ PROBLEMAS COMUNS
+---------------------------------------------------------------------
+  "Nao consegui falar com o LM Studio"
+     -> o servidor do LM Studio nao esta ligado (veja acima).
+
+  "A IA nao respondeu direito"
+     -> aumente o Context Length do modelo no LM Studio para 8192.
+
+  Primeira vez demorando muito no "Transcrevendo"
+     -> normal: ele baixa o modelo do Whisper (~1,6 GB) uma vez so.
+
+  Quer refazer a escolha dos cortes sem transcrever de novo?
+     -> apague os .mp4 e o cortes_escolhidos.json da pasta do video
+        e rode de novo. A transcricao fica guardada.
+
+  Quer transcrever de novo?
+     -> apague o transcricao.json da pasta do video.
+
+
+---------------------------------------------------------------------
+ LEMBRETE IMPORTANTE
+---------------------------------------------------------------------
+  So poste cortes de canais que AUTORIZARAM (de preferencia por
+  escrito) e sempre de o credito. Sem autorizacao, as plataformas
+  derrubam o video e podem banir a conta.

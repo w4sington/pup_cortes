@@ -1,0 +1,8 @@
+faster-whisper>=1.1
+opencv-python-headless>=4.9,<5
+numpy
+requests
+pillow>=10.1
+yt-dlp[default]
+deno
+pystray  # so para o vigia do WhatsApp (opcional)
