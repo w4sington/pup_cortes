@@ -46,19 +46,21 @@ O QUE ELE FAZ
      clique em "Baixar". O video baixado vai para a pasta entrada.
   3. Escolha quantos cortes quer e clique em "Fazer cortes"
   4. Espere a barra encher. No fim aparecem os cortes prontos:
-     "Assistir" abre o video e "Copiar legenda" copia o texto
+     "Assistir" abre o video e "Copiar" copia a legenda
      para colar na hora de postar.
 
   - Da para arrastar o video em cima do icone tambem.
-  - Link que parou de baixar? O YouTube muda sempre: em "Ajustes...",
+  - Link que parou de baixar? O YouTube muda sempre: em "Ajustes",
     clique em "Atualizar o baixador".
   - So baixe videos de canais que autorizaram os cortes.
   - Se o LM Studio estiver desligado, o programa tenta ligar sozinho.
   - Pode fechar a janela no meio: os cortes continuam, e quando
     abrir de novo ele mostra o andamento.
-  - O botao "Ajustes..." muda a cor da legenda, o credito (@ do
+  - O botao "Voltar" leva para a tela inicial sem esquecer o video
+    escolhido. Se os cortes estiverem rodando, eles continuam por tras.
+  - O botao "Ajustes" (o da engrenagem) muda a cor da legenda, o credito (@ do
     canal) e quantos cortes fazer.
-  - Modelo de IA local (em "Ajustes..."): baixe o arquivo .gguf,
+  - Modelo de IA local (em "Ajustes"): baixe o arquivo .gguf,
     ponha na pasta dos modelos (padrao: a do LM Studio,
     %USERPROFILE%\.lmstudio\models), escolha na lista e clique em
     "Carregar". Ele vai inteiro para a placa de video, sem abrir o

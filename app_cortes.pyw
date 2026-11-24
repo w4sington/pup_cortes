@@ -379,11 +379,94 @@ def borda_cortada(cv, x1, y1, x2, y2, cor):
     cv.create_line(x2 - 1, y1 + 1, x2 - 1, y2 - 1, fill=cor)
 
 
+# Icones dos botoes: letras das fontes de icones que ja vem no Windows 10/11
+# (Segoe Fluent Icons no 11, Segoe MDL2 Assets no 10). Sem a fonte, o botao fica so com o texto.
+ICONES = {
+    "ajustes": "\uE713",    # engrenagem
+    "voltar": "\uE72B",     # seta para a esquerda
+    "pasta": "\uE838",      # pasta aberta
+    "procurar": "\uE8B7",   # pasta
+    "assistir": "\uE768",   # play
+    "copiar": "\uE8C8",
+    "baixar": "\uE896",
+    "parar": "\uE71A",
+    "atualizar": "\uE72C",
+    "agendar": "\uE787",    # calendario
+    "detalhes": "\uE8A5",   # documento
+    "cortar": "\uE8C6",     # tesoura
+    "cancelar": "\uE711",   # X
+    "salvar": "\uE74E",
+    "apagar": "\uE74D",     # lixeira
+    "novo": "\uE710",       # +
+    "ok": "\uE73E",         # visto
+    "ligar": "\uE71B",      # corrente (ligar ao site)
+    "desligar": "\uE7E8",   # botao de desligar
+    "testar": "\uE9D9",     # diagnostico
+    "carregar": "\uE945",   # raio
+    "contas": "\uE77B",     # pessoa
+    "abrir": "\uE8A7",      # abrir em outra janela
+    "enviar": "\uE724",     # aviao de papel
+    "editar": "\uE70F",     # lapis
+}
+
+# Icone de cada botao pelo texto dele (assim nao precisa passar icone= em todo lugar).
+# Textos que mudam (ex.: "Agendar 3 cortes") acham o icone pela primeira palavra.
+ICONE_DO_TEXTO = {
+    "Ajustes...": "ajustes", "Fazer cortes": "cortar", "Procurar...": "procurar",
+    "Ver os cortes": "assistir", "Baixar": "baixar", "Parar": "parar", "Voltar": "voltar",
+    "Abrir a pasta": "pasta", "Programar todos...": "agendar", "Fazer outro vídeo": "novo",
+    "Assistir": "assistir", "Copiar": "copiar", "Programar postagem": "agendar",
+    "Ver detalhes": "detalhes", "Tentar de novo": "atualizar", "Ligar ao site...": "ligar",
+    "Cancelar": "cancelar", "Ligar": "ligar", "Abrir de novo": "abrir", "Salvar": "salvar",
+    "Apagar nicho": "apagar", "Pôr na lista": "novo", "Tirar da lista": "apagar",
+    "Atualizar": "atualizar", "Novo nicho...": "novo", "Abrir o painel...": "abrir",
+    "Mudar nicho...": "editar", "Conectar": "ligar", "Desconectar": "desligar",
+    "Conectar de novo": "ligar", "Nova postagem...": "novo", "Postar agora": "enviar",
+    "Mudar...": "editar", "Continuar": "ok", "Agendar": "agendar", "Conectar contas...": "contas",
+    "Atualizar o baixador": "atualizar", "Carregar": "carregar", "Descarregar": "desligar",
+    "Testar": "testar",
+}
+
+
+def icone_do_texto(texto):
+    return ICONE_DO_TEXTO.get(texto) or ICONE_DO_TEXTO.get((texto or "").split(" ")[0])
+_FONTE_ICONES = []  # [nome da fonte ou None], descoberta na primeira vez
+
+
+def fonte_icones():
+    if not _FONTE_ICONES:
+        try:
+            from tkinter import font as tkfont
+            familias = set(tkfont.families())
+        except Exception:  # janela ainda nao existe: tenta de novo na proxima
+            return None
+        _FONTE_ICONES.append(next((f for f in ("Segoe Fluent Icons", "Segoe MDL2 Assets") if f in familias), None))
+    return _FONTE_ICONES[0]
+
+
+_FONTES_MEDIDAS = {}
+
+
+def medir(letra, texto):
+    """Largura em pixels de `texto` na fonte (familia, tamanho)."""
+    if letra not in _FONTES_MEDIDAS:
+        from tkinter import font as tkfont
+        _FONTES_MEDIDAS[letra] = tkfont.Font(family=letra[0], size=letra[1])
+    return _FONTES_MEDIDAS[letra].measure(texto)
+
+
 class Botao(tk.Canvas):
     """Botao do Windows 7: cinza com degrade, azulado com o mouse em cima.
-    `principal=True` e o botao da acao principal, no azul do site."""
+    `principal=True` e o botao da acao principal, no azul do site.
+    `icone` = chave do ICONES (aparece antes do texto; o botao cresce para caber).
+    Sem `icone`, usa o do ICONE_DO_TEXTO; `icone=False` deixa sem."""
 
-    def __init__(self, pai, texto, comando, largura=110, altura=30, tam=10, principal=False):
+    def __init__(self, pai, texto, comando, largura=110, altura=30, tam=10, principal=False, icone=None):
+        if icone is None:
+            icone = icone_do_texto(texto)
+        self.icone = ICONES.get(icone) if icone and fonte_icones() else None
+        if self.icone:
+            largura += tam * 2 + 2
         super().__init__(pai, width=px(largura), height=px(altura), bg=pai["bg"],
                          highlightthickness=0, cursor="hand2")
         self.texto, self.comando, self.tam = texto, comando, tam
@@ -432,8 +515,19 @@ class Botao(tk.Canvas):
         if estado != "desligado":  # filete claro por dentro, o "vidro"
             self.create_line(2, 1, w - 2, 1, fill=misturar(cores[0], "#FFFFFF", 0.6))
         borda_cortada(self, 0, 0, w, h, borda)
-        self.create_text(w / 2, h / 2, text=self.texto, fill=letra,
-                         font=fonte(self.tam, "semi" if self.estilos is ESTILO_PRINCIPAL else "normal"))
+        letra_texto = fonte(self.tam, "semi" if self.estilos is ESTILO_PRINCIPAL else "normal")
+        if not self.icone:
+            self.create_text(w / 2, h / 2, text=self.texto, fill=letra, font=letra_texto)
+            return
+        # icone + espaco + texto, o conjunto centralizado no botao
+        f_ic = (fonte_icones(), self.tam)
+        larg_ic = medir(f_ic, self.icone)
+        larg_tx = medir(letra_texto, self.texto) if self.texto else 0
+        espaco = px(7) if self.texto else 0
+        x = (w - (larg_ic + espaco + larg_tx)) / 2
+        self.create_text(x, h / 2 + 1, text=self.icone, fill=letra, font=f_ic, anchor="w")
+        if self.texto:
+            self.create_text(x + larg_ic + espaco, h / 2, text=self.texto, fill=letra, font=letra_texto, anchor="w")
 
 
 class EscolhaQtd(tk.Frame):
@@ -703,7 +797,7 @@ class TelaInicio(Tela):
         self.info = None
 
         comandos = barra_de_comandos(self)
-        Botao(comandos, "Ajustes...", app.abrir_ajustes, largura=100).pack(side="left")
+        Botao(comandos, "Ajustes", app.abrir_ajustes, largura=90, icone="ajustes").pack(side="left")
         self.fazer = Botao(comandos, "Fazer cortes", self.fazer_cortes, largura=170, altura=36, tam=11,
                            principal=True)
         self.fazer.pack(side="right")
@@ -1013,6 +1107,7 @@ class TelaTrabalhando(Tela):
     def __init__(self, app):
         super().__init__(app)
         comandos = barra_de_comandos(self)
+        Botao(comandos, "Voltar", self.voltar, largura=90).pack(side="left", padx=(0, px(12)))
         self.dica = rotulo(comandos, "", 9, cor=APAGADO)
         self.dica.pack(side="left")
         self.parar = Botao(comandos, "Parar", self.pedir_parar, largura=100)
@@ -1193,6 +1288,14 @@ class TelaTrabalhando(Tela):
                 texto += "\n\nÚltimas linhas:\n" + cauda
             self.app.ir("erro", texto=texto, video=self.video)
 
+    def voltar(self):
+        """Volta para o inicio sem parar nada: os cortes seguem por tras (como pelo .bat).
+        Para ver o andamento de novo, e so clicar em Fazer cortes."""
+        if self.preparando:  # ainda ligando a IA: o corte nem comecou, voltar agora faria comecar dois
+            self.app.aviso_rapido("Espere a IA ligar (ou clique em Parar para desistir).")
+            return
+        self.app.voltar_ao_inicio("Os cortes continuam rodando. Clique em Fazer cortes para ver o andamento.")
+
     def pedir_parar(self):
         if not messagebox.askyesno(NOME, "Parar os cortes agora?\n\nOs cortes que já ficaram prontos não se perdem.",
                                    parent=self.app.raiz):
@@ -1216,6 +1319,7 @@ class TelaPronta(Tela):
     def __init__(self, app):
         super().__init__(app)
         comandos = barra_de_comandos(self)
+        Botao(comandos, "Voltar", app.voltar_ao_inicio, largura=90).pack(side="left", padx=(0, px(8)))
         Botao(comandos, "Abrir a pasta", self.abrir_pasta, largura=120).pack(side="left")
         if SITE:
             Botao(comandos, "Programar todos...", lambda: app.programar(self.itens), largura=150).pack(
@@ -1273,11 +1377,10 @@ class TelaPronta(Tela):
                    anchor="w").pack(fill="x", padx=px(8))
         linha = tk.Frame(c, bg=BRANCO)
         linha.pack(fill="x", padx=px(8), pady=(px(6), px(4)))
-        Botao(linha, "Assistir", lambda: abrir(item["arquivo"]), largura=68, altura=26, tam=9).pack(side="left")
-        Botao(linha, "Copiar legenda", lambda: self.copiar(item), largura=92, altura=26,
-              tam=9).pack(side="right")
+        Botao(linha, "Assistir", lambda: abrir(item["arquivo"]), largura=58, altura=26, tam=9).pack(side="left")
+        Botao(linha, "Copiar", lambda: self.copiar(item), largura=54, altura=26, tam=9).pack(side="right")
         if SITE:
-            Botao(c, "Programar postagem", lambda: self.app.programar([item]), largura=160, altura=26,
+            Botao(c, "Programar postagem", lambda: self.app.programar([item]), largura=140, altura=26,
                   tam=9).pack(padx=px(8), pady=(0, px(10)))
         else:
             tk.Frame(c, bg=BRANCO, height=px(4)).pack()
@@ -1309,10 +1412,10 @@ class TelaErro(Tela):
     def __init__(self, app):
         super().__init__(app)
         comandos = barra_de_comandos(self)
+        Botao(comandos, "Voltar", app.voltar_ao_inicio, largura=90).pack(side="left", padx=(0, px(8)))
         Botao(comandos, "Ver detalhes", lambda: abrir(controle.ARQ_LOG), largura=110).pack(side="left")
         self.tentar = Botao(comandos, "Tentar de novo", self.tentar_de_novo, largura=130, principal=True)
         self.tentar.pack(side="right")
-        Botao(comandos, "Voltar ao início", lambda: app.ir("inicio"), largura=130).pack(side="right", padx=px(8))
 
         corpo = tk.Frame(self, bg=BRANCO)
         corpo.pack(fill="both", expand=True, padx=px(24), pady=px(20))
@@ -3313,6 +3416,15 @@ class App:
             self.atual.ligar()
         elif nome == "inicio":
             self.atual.montar_recentes()
+
+    def voltar_ao_inicio(self, aviso=None):
+        """Botao Voltar: volta para a tela inicial SEM esquecer o video escolhido
+        (o "Fazer outro video" e que comeca do zero)."""
+        self.trocar("inicio")
+        self.atual.montar_recentes()
+        self.atualizar_status()
+        if aviso:
+            self.aviso_rapido(aviso)
 
     def marcar_aba(self):
         for chave, (r, filete) in self.abas.items():

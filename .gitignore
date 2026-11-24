@@ -22,6 +22,7 @@ servidor_ia.json
 ultima_postagem.json
 analise_ok.txt
 *.log
+logs/
 
 # Videos soltos, por garantia
 *.mp4
