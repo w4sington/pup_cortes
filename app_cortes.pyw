@@ -66,7 +66,7 @@ QTDS = [3, 5, 8, 10]
 TELAS_CORTES = ("inicio", "trabalhando", "pronto", "erro")  # o que fica atras da aba "Cortes"
 INTERVALOS = [("1 hora", 3600), ("2 horas", 7200), ("3 horas", 10800), ("6 horas", 21600),
               ("12 horas", 43200), ("1 dia", 86400), ("2 dias", 172800)]
-COR_REDE = {"instagram": "#C13584", "tiktok": "#111111"}
+COR_REDE = {"instagram": "#C13584", "tiktok": "#111111", "youtube": "#CC0000"}
 
 # Cores do site (nextlevelpc.com.br) + cinzas do Windows 7
 AZUL, AZUL_ESCURO, CIANO, MARINHO = "#2563EB", "#1D4ED8", "#00D4FF", "#0F172A"
@@ -1602,9 +1602,14 @@ class JanelaConectar(Dialogo):
         self.texto.pack(anchor="w")
         self.barra = Barra(corpo, largura=460, altura=14)
         self.barra.pack(anchor="w", pady=(px(14), 0))
-        lembrete = ("Cada conta do Instagram precisa estar como testadora no app da Meta (Funções do app) e "
-                    "ter aceitado o convite." if rede == "instagram" else
-                    "Sem a aprovação do TikTok, o app dele aceita até 10 contas no Sandbox (Target users).")
+        lembrete = {
+            "instagram": "Cada conta do Instagram precisa estar como testadora no app da Meta (Funções do app) e "
+                         "ter aceitado o convite.",
+            "tiktok": "Sem a aprovação do TikTok, o app dele aceita até 10 contas no Sandbox (Target users).",
+            "youtube": "Enquanto o app do Google estiver em teste, o e-mail da conta precisa estar em Usuários de "
+                       "teste (Google Cloud > Tela de permissão OAuth). Se o Google avisar que o app não foi "
+                       "verificado, clique em Avançado e depois em Continuar.",
+        }.get(rede, "")
         rotulo(corpo, lembrete, 9, cor=APAGADO, wraplength=px(460), justify="left").pack(anchor="w", pady=(px(10), 0))
         self.abrir()
         self.app.em_segundo_plano(lambda: redes.conectar(app.cfg, rede, nicho["id"] if nicho else None),
@@ -1626,7 +1631,8 @@ class JanelaConectar(Dialogo):
             return
         self.url, self.state = res
         self.abrir_navegador()
-        quem = "na conta profissional do Instagram" if self.rede == "instagram" else "na conta do TikTok"
+        quem = {"instagram": "na conta profissional do Instagram", "tiktok": "na conta do TikTok",
+                "youtube": "na conta Google do canal do YouTube"}.get(self.rede, "na conta")
         if self.nicho:
             quem += f" do nicho {self.nicho['nome']}"
         self.texto.config(text=f"Termine no navegador: entre {quem} e clique em Permitir. Se ele já entrar "
@@ -1887,7 +1893,7 @@ class TelaContas(Tela):
         self.r = r
         self.app.nichos = r.get("nichos") or []
         self.agendador.config(text=texto_agendador(r.get("agendador_seg")))
-        faltam = [redes.NOMES[x] for x in ("instagram", "tiktok") if not r.get(f"{x}_pronto")]
+        faltam = [redes.NOMES[x] for x in redes.REDES if not r.get(f"{x}_pronto")]
         if faltam:
             g = grupo(self.corpo, "Falta configurar no site")
             rotulo(g, f"Falta colar no site as chaves do app do {' e do '.join(faltam)} (só uma vez). O passo a "
@@ -1923,7 +1929,7 @@ class TelaContas(Tela):
             rotulo(g, "Nenhuma conta neste nicho ainda.", 9, cor=APAGADO).pack(anchor="w", pady=(0, px(6)))
         rodape = tk.Frame(g, bg=BRANCO)
         rodape.pack(fill="x", pady=(px(4), 0))
-        for rede in ("instagram", "tiktok"):
+        for rede in redes.REDES:
             if self.r.get(f"{rede}_pronto"):
                 Botao(rodape, f"Conectar {redes.NOMES[rede]}...",
                       lambda rd=rede: JanelaConectar(self.app, rd, self.carregar, n),
@@ -2421,6 +2427,19 @@ class JanelaAgendar(Dialogo):
         # --- TikTok "postar direto" (aparece quando uma conta nesse modo e marcada) ---------
         self.tiktok = grupo(self.dir, "TikTok: postar direto", padx=0, mostrar=False)
 
+        # --- YouTube Shorts (aparece quando uma conta do YouTube e marcada) ------------------
+        self.youtube = grupo(self.dir, "YouTube Shorts", padx=0, mostrar=False)
+        linha = tk.Frame(self.youtube, bg=BRANCO)
+        linha.pack(anchor="w")
+        rotulo(linha, "Quem pode ver:", 9).pack(side="left", padx=(0, px(6)))
+        self.privacidade_yt = ttk.Combobox(linha, state="readonly", width=22, font=fonte(9),
+                                           values=list(redes.PRIVACIDADE_YOUTUBE.values()))
+        self.privacidade_yt.current(0)
+        self.privacidade_yt.pack(side="left")
+        rotulo(self.youtube, f"O título do Short é o título do corte (até {redes.MAX_TITULO_YOUTUBE} letras) e "
+                             "a descrição é a legenda. Corte em pé de até 3 minutos vira Short sozinho.", 9,
+               cor=APAGADO, wraplength=px(430), justify="left").pack(anchor="w", pady=(px(6), 0))
+
         # --- andamento do envio para o site ------------------------------------------------
         self.andamento = tk.Frame(self.dir, bg=BRANCO)
         self.barra = Barra(self.andamento, largura=430, altura=18)
@@ -2590,6 +2609,14 @@ class JanelaAgendar(Dialogo):
             self.ok.mudar("Agendar" if n == 1 else f"Agendar {n} cortes")
         if not self.editando:
             self.atualizar_tiktok()
+            self.atualizar_youtube()
+
+    def atualizar_youtube(self):
+        moldura = self.youtube.master
+        if not any(c["rede"] == "youtube" for c in self.escolhidas()):
+            moldura.pack_forget()
+        elif not moldura.winfo_ismapped():
+            moldura.pack(fill="x", pady=(0, px(12)))
 
     def contar(self):
         n = len(self.texto.get("1.0", "end-1c"))
@@ -2742,8 +2769,11 @@ class JanelaAgendar(Dialogo):
                 self.erro(str(e))
                 return
             maximo = self.max_duracao
+        opcoes_yt = {"privacidade": list(redes.PRIVACIDADE_YOUTUBE)[max(self.privacidade_yt.current(), 0)]}
+        limite_yt = redes.MAX_SHORT if any(c["rede"] == "youtube" for c in escolhidas) else 0
         destinos = [{"conta": c["id"],
-                     "opcoes": opcoes_tt if c["rede"] == "tiktok" and c.get("modo") == "direto" else {}}
+                     "opcoes": opcoes_tt if c["rede"] == "tiktok" and c.get("modo") == "direto"
+                     else opcoes_yt if c["rede"] == "youtube" else {}}
                     for c in escolhidas]
         nicho = self.nicho_atual()
         gravar_json(ARQ_ULTIMA_POSTAGEM, {"contas": [c["id"] for c in escolhidas],
@@ -2764,11 +2794,14 @@ class JanelaAgendar(Dialogo):
                 for i, item in enumerate(itens):
                     if self.cancelado:
                         raise redes.ErroRede("Envio cancelado.")
-                    if maximo:
+                    if maximo or limite_yt:
                         dur = cortes.info_video(item["arquivo"])["dur"]
-                        if dur > maximo:
+                        if maximo and dur > maximo:
                             raise redes.ErroRede(f"O corte {item['numero']:02d} tem {dur:.0f} s, e essa conta do "
                                                  f"TikTok só aceita até {maximo} s.")
+                        if limite_yt and dur > limite_yt:
+                            raise redes.ErroRede(f"O corte {item['numero']:02d} tem {dur:.0f} s, e o YouTube "
+                                                 "Shorts só aceita até 3 minutos.")
                     quando = quandos[i]
                     if agora:
                         quando = max(quando, time.time())
