@@ -39,7 +39,7 @@ Tudo roda no Windows, sem serviço pago: Whisper para ouvir, um modelo de IA loc
 ## Instalação
 
 ```bat
-git clone <endereco-deste-repositorio> pup_cortes
+git clone https://github.com/w4sington/pup_cortes
 cd pup_cortes
 1_INSTALAR.bat
 6_CRIAR_ATALHO_NA_AREA_DE_TRABALHO.bat
